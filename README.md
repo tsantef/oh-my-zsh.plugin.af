@@ -12,4 +12,4 @@
 
     plugins=(git af)
 
-4) Restart your shell or open an new terminal window.
+4) Restart your shell or open a new terminal window.
