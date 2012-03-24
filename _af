@@ -1,0 +1,65 @@
+#compdef af
+#autoload
+
+# AF autocomplete plugin for Oh-My-Zsh
+# Requires: The PHP Fog CLI (https://github.com/phpfog/pf)
+# Written by: Tim Santeford
+
+_get_apps() { 
+    for APP in `af apps | grep -oE '^\| [[:alnum:]-]+ . ' | grep -oE '[[:alnum:]-]+'`; do
+        compadd "$@" $APP
+    done
+}
+
+_get_system_service() {
+    for SERVICE in `af services | grep -oE '\| [[:alnum:]]+[ ]+\| [[:digit:]]' | grep -oE '[[:alnum:]]+ '`; do
+        compadd "$@" $SERVICE
+    done
+}
+
+_get_service_name() {
+    for SERVICE_NAME in `af services | grep -oE '\| [[:alnum:]-]+[ ]+\| [[:lower:]]' | grep -oE '[[:alnum:]-]+[ ]+\|' | grep -oE '.* '`; do
+        compadd "$@" $SERVICE_NAME
+    done
+}
+
+_af() {
+    local start state
+    _arguments '1: :->start'
+    case $state in
+    start)
+        _arguments "1:Commands:(add-user alias aliases apps bind-service clone-services crashes crashlogs create-service delete delete-user env env-add env-del files frameworks info instances help login logout logs map mem passwd push rename restart runtimes services start stats stop target targets unalias unbind-service unmap update user)"
+    ;;
+    *)
+        case $words[2] in
+        push|start|stop|restart|delete|rename|update|mem|map|unmap|instances|crashes|crashlogs|logs|files|stats|env|env-add|env-del)
+            _arguments "2: :_get_apps"
+        ;;
+        clone-services)
+            _arguments "2: :_get_apps"
+            
+            case $words[3] in
+            *)
+                _arguments "3: :_get_apps"
+            esac
+        ;;
+        create-service)
+            _arguments "2: :_get_system_service"
+        ;;
+        delete-service)
+            _arguments "2: :_get_service_name"
+        ;;
+        bind-service|unbind-service)
+            _arguments "2: :_get_service_name"
+
+            case $words[3] in
+            *)
+                _arguments "3: :_get_apps"
+            esac
+        ;;
+        help)
+            _arguments "2:Commands:(add-user alias aliases apps bind-service clone-services crashes crashlogs create-service delete delete-user env env-add env-del files frameworks info instances help login logout logs map mem passwd push rename restart runtimes services start stats stop target targets unalias unbind-service unmap update user)"
+        ;;
+        esac
+    esac
+}
